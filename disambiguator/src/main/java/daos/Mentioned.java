@@ -13,11 +13,14 @@ public class Mentioned {
 	@Column(name = "Id")
 	private Long id;
 
-	@Column(name = "proj_real_name")
+	@Column(name = "this_real_name")
 	private String realname;
 
-	@Column(name = "mentioned_in")
-	private String mentionedIn;
+	@Column(name = "is_mentioned_in")
+	private Long mentionedIn;
+	
+	@Column(name = "context")
+	private String context;
 
 	public Long getId() {
 		return id;
@@ -37,15 +40,19 @@ public class Mentioned {
 		this.realname = realname;
 	}
 
-	public void setMentionedIn(String mentionedIn) {
+	public void setMentionedIn(Long mentionedIn) {
 		this.mentionedIn = mentionedIn;
 	}
 
-	public String getMentionedIn() {
+	public Long getMentionedIn() {
 		return mentionedIn;
 	}
 
-	
+	public void setContext(String context) {
+		this.context = context;
+	}
 
-	
+	public String getContext() {
+		return context;
+	}
 }

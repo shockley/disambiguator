@@ -6,7 +6,6 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.CorruptIndexException;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -18,7 +17,6 @@ import org.apache.lucene.search.TotalHitCountCollector;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.junit.Test;
 
 public class NaughtyLocator {
 	public static Logger logger = Logger.getLogger(NaughtyLocator.class);

@@ -36,11 +36,8 @@ import dataconns.HibernateService;
 
 public class DescriptionScanner {
 	private Logger logger = Logger.getLogger(DescriptionScanner.class);
-
-	/**
-	 * In this kind of index, each project real name has an index document
-	 */
-	public static String INDEX_FOLDER = "d:/influx.result.index/";
+	public static String INTEGRATED_INDEX_FOLDER = "d:/influx.result.index/";
+	public static String ORG_INDEX_FOLDER = "d:/influx.index/";
 	private Directory dir = null;
 	private IndexSearcher searcher = null;
 	private HibernateService hs = DataSourceFactory.getHibernateInstance();
@@ -60,10 +57,7 @@ public class DescriptionScanner {
 			Transaction tx = session.beginTransaction();
 			
 			//these parameters are for logging
-			String thatname = null;
 			String thisname = null;
-			Document d = null;
-			ScoreDoc scoreDoc = null;
 			//
 			
 			String hql = "select distinct obj.realname from Project obj";
@@ -106,23 +100,27 @@ public class DescriptionScanner {
 					TopDocs topDocs = collector.topDocs();
 					ScoreDoc[] scoreDocs = topDocs.scoreDocs;
 					for (ScoreDoc sdoc : scoreDocs) {
-						scoreDoc = sdoc;
-						logger.info(thisname +" : "+ scoreDoc+" OK ");
+						logger.info(thisname +" : "+ sdoc+" OK ");
 						//here something wrong with the index file, string decoding, out of java space error
-						d = searcher.doc(scoreDoc.doc);
-						thatname = d.get(Fields.PROJECT_REAL_NAME);
+						Document d = searcher.doc(sdoc.doc);
+						Long mentiond_in = Long.valueOf(d.get(Fields.PROJECT_ID));
+						String forge = d.get(Fields.PROJECT_FORGE);
+						String context = "";
+						
+						if(forge.equals("sourceforge")){
+							context = d.get(Fields.SF_SUMMARY);
+						}else if(forge.equals("ow2")){
+							context = d.get(Fields.FM_SUMMARY);
+						}else if(forge.equals("freshmeat")){
+							context = d.get(Fields.OW2_SUMMARY);
+						}
+						
 						Mentioned mention = new Mentioned();
 						mention.setRealname(thisname);
-						mention.setMentionedIn(thatname);
-						session.save(mention);
+						mention.setMentionedIn(mentiond_in);
+						mention.setContext(context);
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					logger.error("that name "+ thatname);
-					logger.error("this name "+ thisname);
-					logger.error("document "+ d);
-					logger.error("sdoc.doc "+ scoreDoc.doc);
-					logger.error("Stack Tracse "+e.getStackTrace());
 					e.printStackTrace();
 				}
 			}
@@ -133,7 +131,7 @@ public class DescriptionScanner {
 
 	public DescriptionScanner() {
 		super();
-		File path = new File(INDEX_FOLDER);
+		File path = new File(ORG_INDEX_FOLDER);
 		if (path == null || !path.isDirectory()) {
 			String warning = "Error : Index directory is missing!";
 			logger.error(warning);
