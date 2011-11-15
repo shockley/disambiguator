@@ -119,6 +119,7 @@ public class DescriptionScanner {
 						mention.setRealname(thisname);
 						mention.setMentionedIn(mentiond_in);
 						mention.setContext(context);
+						session.save(mention);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
