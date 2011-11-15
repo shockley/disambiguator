@@ -1,1 +1,2 @@
 ERROR @ 2011-11-11 20:24:35,684 [main] (DescriptionScanner.java:96) - Error : Index directory is missing!
+ INFO @ 2011-11-15 16:54:46,327 [main] (IndexScanner.java:32) - max doc = 385
