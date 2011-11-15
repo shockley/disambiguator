@@ -18,21 +18,18 @@ import org.apache.lucene.search.TotalHitCountCollector;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.junit.Test;
 
-import daos.Mentioned;
-
-public class IndexScanner {
-	public static Logger logger = Logger.getLogger(IndexScanner.class);
+public class NaughtyLocator {
+	public static Logger logger = Logger.getLogger(NaughtyLocator.class);
 	public static String INDEX_FOLDER = "d:/influx.result.index/";
 	private Directory dir = null;
-	private IndexReader reader = null;
 	private IndexSearcher searcher = null;
 	
-	public IndexScanner(){
+	public NaughtyLocator(){
 		File indexfolder = new File(INDEX_FOLDER);
 		try {
 			dir = FSDirectory.open(indexfolder);
-			reader = IndexReader.open(dir);
 			searcher = new IndexSearcher(dir);
 		} catch (CorruptIndexException e) {
 			// TODO Auto-generated catch block
@@ -42,26 +39,9 @@ public class IndexScanner {
 			e.printStackTrace();
 		}
 	}
-	public void scanit(){
-		int maxdoc = reader.maxDoc();
-		Document d;
-		logger.warn("max doc = "+maxdoc);
-		for(int i = 0; i< maxdoc;i++){
-			try {
-				d = reader.document(i);
-			} catch (CorruptIndexException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			logger.info(""+i+" OK");
-		}
-		logger.warn("all OK!");
-	}
 	
-	public void test(String thisname){
+	public Document getNaughtyDoc(String thisname){
+		Document d = null;
 		Term noselfterm = new Term(Fields.PROJECT_REAL_NAME, thisname);
 		Term sfterm = new Term(Fields.SF_SUMMARY, thisname);
 		Term fmterm = new Term(Fields.FM_SUMMARY, thisname);
@@ -81,28 +61,18 @@ public class IndexScanner {
 			searcher.search(mainQuery, counter);
 			int total = counter.getTotalHits();
 			if (total <= 0)
-				return;
+				return d;
 			TopScoreDocCollector collector = TopScoreDocCollector.create(
 					total, true);
 			searcher.search(mainQuery, collector);
 			TopDocs topDocs = collector.topDocs();
 			ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-			Document d = searcher.doc(0);
-			String thatname = d.get(Fields.PROJECT_REAL_NAME);
-			/*for (ScoreDoc sdoc : scoreDocs) {
-				logger.info(thisname +" : "+ sdoc+" OK ");
-				//here something wrong with the index file, string decoding, out of java space error
-				Document d = searcher.doc(sdoc.doc);
-				String thatname = d.get(Fields.PROJECT_REAL_NAME);
-			}*/
+			d = searcher.doc(0);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return d;
 	}
-	
-	public static void main(String [] args){
-		IndexScanner scanner = new IndexScanner();
-		scanner.test("use");
-	}
+
 }

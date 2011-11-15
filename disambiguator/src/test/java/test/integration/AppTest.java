@@ -1,4 +1,4 @@
-package influx.disambiguator;
+package test.integration;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -25,7 +25,7 @@ public class AppTest
      */
     public static Test suite()
     {
-        return new TestSuite( AppTest.class );
+        return new TestSuite( AppTest.class);
     }
 
     /**
