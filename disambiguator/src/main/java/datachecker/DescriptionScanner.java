@@ -69,7 +69,6 @@ public class DescriptionScanner {
 				//log every 1000 iterations
 				if(i%1000==0)
 					logger.info("We've scanned " +i+ " realnames");
-				
 				thisname = allRealnames.get(i);
 				if(thisname == null) continue;
 				
@@ -102,6 +101,7 @@ public class DescriptionScanner {
 					ScoreDoc[] scoreDocs = topDocs.scoreDocs;
 					for (ScoreDoc sdoc : scoreDocs) {
 						scoreDoc = sdoc;
+						//here something wrong with the index file, string decoding, out of java space error
 						d = searcher.doc(scoreDoc.doc);
 						thatname = d.get(Fields.PROJECT_REAL_NAME);
 						Mentioned mention = new Mentioned();
