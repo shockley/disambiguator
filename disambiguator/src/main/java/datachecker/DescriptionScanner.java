@@ -43,12 +43,18 @@ public class DescriptionScanner {
 	public static String INDEX_FOLDER = "d:/influx.result.index/";
 	private Directory dir = null;
 	private IndexSearcher searcher = null;
-
+	private HibernateService hs = DataSourceFactory.getHibernateInstance();
+	public void idfScanner(){
+		
+	}
 	
+	/**
+	 * scan them to find out all the mentions. 
+	 * Specifically, we fetch all the realnames (from db), and use each of them as keyword to 
+	 * hit the SUMMARY fields of index file, and record the PROJECT_REAL_NAME field of the hits
+	 */
 	public void scanThemAll() {
-
 			// List<Project> projects = new ArrayList<Project>();
-			HibernateService hs = DataSourceFactory.getHibernateInstance();
 			List<String> allRealnames = null;
 			Session session = hs.getSession();
 			Transaction tx = session.beginTransaction();
@@ -101,6 +107,7 @@ public class DescriptionScanner {
 					ScoreDoc[] scoreDocs = topDocs.scoreDocs;
 					for (ScoreDoc sdoc : scoreDocs) {
 						scoreDoc = sdoc;
+						logger.info(thisname +" : "+ scoreDoc+" OK ");
 						//here something wrong with the index file, string decoding, out of java space error
 						d = searcher.doc(scoreDoc.doc);
 						thatname = d.get(Fields.PROJECT_REAL_NAME);
@@ -108,7 +115,6 @@ public class DescriptionScanner {
 						mention.setRealname(thisname);
 						mention.setMentionedIn(thatname);
 						session.save(mention);
-						logger.info(thisname +" : "+ scoreDoc+" OK ");
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
