@@ -68,7 +68,7 @@ public class DescriptionScanner {
 				// a project could be mentioned in either of the 3 summaries
 				//log every 1000 iterations
 				if(i%1000==0)
-					logger.info("We've scanned " +i+ " realnames");
+					logger.warn("We've scanned " +i+ " realnames");
 				thisname = allRealnames.get(i);
 				if(thisname == null) continue;
 				
@@ -108,6 +108,7 @@ public class DescriptionScanner {
 						mention.setRealname(thisname);
 						mention.setMentionedIn(thatname);
 						session.save(mention);
+						logger.info(thisname +" : "+ scoreDoc+" OK ");
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
