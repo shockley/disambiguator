@@ -136,7 +136,8 @@ public class DescriptionScanner {
 							mention.setMentionedIn(mentiond_in);
 							mention.setContext(context);
 							//Here appears the problem
-							session.save(mention);
+							//be aware!! nested tx appeared
+							hs.addTuple(mention);
 						}//end of each realname's match-list
 					} catch (Exception e) {
 						e.printStackTrace();
