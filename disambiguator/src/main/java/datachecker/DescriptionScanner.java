@@ -67,8 +67,9 @@ public class DescriptionScanner {
 			}
 			long count = (Long) resultList.get(0);
 			tx.commit();
-			session.close();
 			for(long j = 0; j <= n; j++){
+				//each fold a transaction
+				tx = session.beginTransaction();
 				long loopbegin =  j *(count/n)+1;
 				long loopend;
 				if(n!=j){
@@ -136,13 +137,14 @@ public class DescriptionScanner {
 							mention.setContext(context);
 							//Here appears the problem
 							session.save(mention);
-						}
+						}//end of each realname's match-list
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				}
-			}
-			
+				}// end of each loop
+				tx.commit();
+			}// end of each fold
+			session.close();
 			
 	}
 
