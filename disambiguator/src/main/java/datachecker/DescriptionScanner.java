@@ -61,7 +61,7 @@ public class DescriptionScanner {
 			Query q = session.createQuery(hql);
 			List resultList = q.list();
 			if(resultList==null || resultList.size()!=1){
-				logger.error("Wrong result list returned when doing sql query");
+				logger.error("Wrong result list returned when doing sql query!!!!");
 			}
 			long count = (Long) resultList.get(0);
 			//database tuple id is 1-based
