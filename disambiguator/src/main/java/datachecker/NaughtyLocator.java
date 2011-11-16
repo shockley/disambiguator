@@ -1,4 +1,6 @@
-package index;
+package datachecker;
+
+import index.Fields;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,12 +22,11 @@ import org.apache.lucene.store.FSDirectory;
 
 public class NaughtyLocator {
 	public static Logger logger = Logger.getLogger(NaughtyLocator.class);
-	public static String INDEX_FOLDER = "d:/influx.result.index/";
 	private Directory dir = null;
 	private IndexSearcher searcher = null;
 	
 	public NaughtyLocator(){
-		File indexfolder = new File(INDEX_FOLDER);
+		File indexfolder = new File(StaticVariables.ORG_INDEX_FOLDER);
 		try {
 			dir = FSDirectory.open(indexfolder);
 			searcher = new IndexSearcher(dir);

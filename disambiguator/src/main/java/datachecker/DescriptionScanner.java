@@ -36,8 +36,7 @@ import dataconns.HibernateService;
 
 public class DescriptionScanner {
 	private Logger logger = Logger.getLogger(DescriptionScanner.class);
-	public static String INTEGRATED_INDEX_FOLDER = "d:/influx.result.index/";
-	public static String ORG_INDEX_FOLDER = "d:/influx.index/";
+	
 	private Directory dir = null;
 	private IndexSearcher searcher = null;
 	private HibernateService hs = DataSourceFactory.getHibernateInstance();
@@ -114,11 +113,11 @@ public class DescriptionScanner {
 						}else if(forge.equals("freshmeat")){
 							context = d.get(Fields.OW2_SUMMARY);
 						}
-						
 						Mentioned mention = new Mentioned();
 						mention.setRealname(thisname);
 						mention.setMentionedIn(mentiond_in);
 						mention.setContext(context);
+						//Here appears the problem
 						session.save(mention);
 					}
 				} catch (Exception e) {
@@ -127,12 +126,11 @@ public class DescriptionScanner {
 			}
 			tx.commit();
 			session.close();
-		
 	}
 
 	public DescriptionScanner() {
 		super();
-		File path = new File(ORG_INDEX_FOLDER);
+		File path = new File(StaticVariables.ORG_INDEX_FOLDER);
 		if (path == null || !path.isDirectory()) {
 			String warning = "Error : Index directory is missing!";
 			logger.error(warning);

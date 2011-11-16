@@ -1,7 +1,6 @@
 package test.index;
 
 import static org.junit.Assert.assertTrue;
-import index.NaughtyLocator;
 
 import java.io.IOException;
 
@@ -11,6 +10,8 @@ import junit.framework.TestSuite;
 import org.apache.lucene.document.Document;
 import org.junit.Before;
 import org.junit.Test;
+
+import datachecker.NaughtyLocator;
 
 public class NaughtyLocatorTest {
 	private NaughtyLocator locator;

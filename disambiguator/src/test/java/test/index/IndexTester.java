@@ -13,6 +13,8 @@ import org.apache.lucene.store.FSDirectory;
 import org.junit.Before;
 import org.junit.Test;
 
+import datachecker.StaticVariables;
+
 public class IndexTester {
 	public static String INDEX_FOLDER = "d:/influx.result.index/";
 	private Directory dir = null;
@@ -28,7 +30,7 @@ public class IndexTester {
 	}
 
 	@Before public void setUp() throws IOException{
-		File indexfolder = new File(INDEX_FOLDER);
+		File indexfolder = new File(StaticVariables.ORG_INDEX_FOLDER);
 		dir = FSDirectory.open(indexfolder);
 		reader = IndexReader.open(dir);
 	}
