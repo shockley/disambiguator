@@ -54,23 +54,28 @@ public class DescriptionScanner {
 			List<String> allRealnames = null;
 			Session session = hs.getSession();
 			Transaction tx = session.beginTransaction();
-			
-			//these parameters are for logging
 			String thisname = null;
-			//
 			
-			String hql = "select distinct obj.realname from Project obj";
+			//count the project number
+			String hql = "select count(obj) from Project obj";
 			Query q = session.createQuery(hql);
-			allRealnames = q.list();
-			int totalrealname = allRealnames.size();
-			for (int i = 0; i<totalrealname;i++ ) {
-				// a project could be mentioned in either of the 3 summaries
-				//log every 1000 iterations
+			List resultList = q.list();
+			if(resultList==null || resultList.size()!=1){
+				logger.error("Wrong result list returned when doing sql query");
+			}
+			long count = (Long) resultList.get(0);
+			//database tuple id is 1-based
+			for(long i =1; i<=count; i++){
 				if(i%1000==0)
 					logger.warn("We've scanned " +i+ " realnames");
-				thisname = allRealnames.get(i);
+				hql = "select obj.realname from Project obj where obj.id = " + i;
+				q = session.createQuery(hql);
+				resultList = q.list();
+				if(resultList==null || resultList.size()!=1){
+					logger.error("Wrong result list returned when doing sql query");
+				}
+				thisname = (String) resultList.get(0);
 				if(thisname == null) continue;
-				
 				
 				Term noselfterm = new Term(Fields.PROJECT_REAL_NAME, thisname);
 				Term sfterm = new Term(Fields.SF_SUMMARY, thisname);

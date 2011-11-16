@@ -774,3 +774,6 @@ ERROR @ 2011-11-11 20:24:35,684 [main] (DescriptionScanner.java:96) - Error : In
  INFO @ 2011-11-15 17:04:36,579 [main] (IndexScanner.java:45) - 383 OK
  INFO @ 2011-11-15 17:04:36,579 [main] (IndexScanner.java:45) - 384 OK
  WARN @ 2011-11-15 17:04:36,579 [main] (IndexScanner.java:47) - all OK!
+ERROR @ 2011-11-16 16:04:01,666 [main] (DescriptionScanner.java:140) - Error : Index directory is missing!
+ERROR @ 2011-11-16 16:51:53,660 [main] (DescriptionScanner.java:75) - Wrong result list returned when doing sql query
+ERROR @ 2011-11-16 16:53:27,058 [main] (DescriptionScanner.java:75) - Wrong result list returned when doing sql query
