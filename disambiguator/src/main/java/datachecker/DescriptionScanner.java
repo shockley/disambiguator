@@ -46,10 +46,12 @@ public class DescriptionScanner {
 	
 	/**
 	 * scan them to find out all the mentions. 
-	 * Specifically, we fetch all the realnames (from db), and use each of them as keyword to 
+	 * Specifically, we fetch the realnames (from db) in an n-fold manner
+	 * in which n is specified by the @param n; 
+	 * and use each of them as keyword to 
 	 * hit the SUMMARY fields of index file, and record the PROJECT_REAL_NAME field of the hits
 	 */
-	public void scanThemAll() {
+	public void scanThemAll(int n) {
 			// List<Project> projects = new ArrayList<Project>();
 			List<String> allRealnames = null;
 			Session session = hs.getSession();
@@ -64,73 +66,84 @@ public class DescriptionScanner {
 				logger.error("Wrong result list returned when doing sql query!");
 			}
 			long count = (Long) resultList.get(0);
-			//database tuple id is 1-based
-			for(long i =1; i<=count; i++){
-				if(i%1000==0)
-					logger.warn("We've scanned " +i+ " realnames");
-				hql = "select obj.realname from Project obj where obj.id = " + i;
-				q = session.createQuery(hql);
-				resultList = q.list();
-				if(resultList==null || resultList.size()!=1){
-					logger.error("Wrong result list returned when doing sql query");
-				}
-				thisname = (String) resultList.get(0);
-				if(thisname == null) continue;
-				
-				Term noselfterm = new Term(Fields.PROJECT_REAL_NAME, thisname);
-				Term sfterm = new Term(Fields.SF_SUMMARY, thisname);
-				Term fmterm = new Term(Fields.FM_SUMMARY, thisname);
-				Term owterm = new Term(Fields.OW2_SUMMARY, thisname);
-				TermQuery noselfquery = new TermQuery(noselfterm);
-				TermQuery sfquery = new TermQuery(sfterm);
-				TermQuery fmquery = new TermQuery(fmterm);
-				TermQuery owquery = new TermQuery(owterm);
-				BooleanQuery mainQuery = new BooleanQuery();
-				mainQuery.add(noselfquery, Occur.MUST_NOT);
-				mainQuery.add(sfquery, Occur.SHOULD);
-				mainQuery.add(fmquery, Occur.SHOULD);
-				mainQuery.add(owquery, Occur.SHOULD);
-
-				// fetch all the hits
-				TotalHitCountCollector counter = new TotalHitCountCollector();
-				try {
-					searcher.search(mainQuery, counter);
-					int total = counter.getTotalHits();
-					if (total <= 0)
-						continue;
-					TopScoreDocCollector collector = TopScoreDocCollector.create(
-							total, true);
-					searcher.search(mainQuery, collector);
-					TopDocs topDocs = collector.topDocs();
-					ScoreDoc[] scoreDocs = topDocs.scoreDocs;
-					for (ScoreDoc sdoc : scoreDocs) {
-						logger.info(thisname +" : "+ sdoc+" OK ");
-						//here something wrong with the index file, string decoding, out of java space error
-						Document d = searcher.doc(sdoc.doc);
-						Long mentiond_in = Long.valueOf(d.get(Fields.PROJECT_ID));
-						String forge = d.get(Fields.PROJECT_FORGE);
-						String context = "";
-						
-						if(forge.equals("sourceforge")){
-							context = d.get(Fields.SF_SUMMARY);
-						}else if(forge.equals("ow2")){
-							context = d.get(Fields.FM_SUMMARY);
-						}else if(forge.equals("freshmeat")){
-							context = d.get(Fields.OW2_SUMMARY);
-						}
-						Mentioned mention = new Mentioned();
-						mention.setRealname(thisname);
-						mention.setMentionedIn(mentiond_in);
-						mention.setContext(context);
-						//Here appears the problem
-						session.save(mention);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
 			tx.commit();
 			session.close();
+			for(long j = 0; j <= n; j++){
+				long loopbegin =  j *(count/n)+1;
+				long loopend;
+				if(n!=j){
+					loopend = (j+1)*(count/n);
+				}else{
+					loopend = count;
+				}
+				//database tuple id is 1-based, so 'loopbegin+1'
+				for(long i = loopbegin; i<=loopend; i++){
+					if(i%1000==0)
+						logger.warn("We've scanned " +i+ " realnames");
+					hql = "select obj.realname from Project obj where obj.id = " + i;
+					q = session.createQuery(hql);
+					resultList = q.list();
+					if(resultList==null || resultList.size()!=1){
+						logger.error("Wrong result list returned when doing sql query");
+					}
+					thisname = (String) resultList.get(0);
+					if(thisname == null) continue;
+					
+					Term noselfterm = new Term(Fields.PROJECT_REAL_NAME, thisname);
+					Term sfterm = new Term(Fields.SF_SUMMARY, thisname);
+					Term fmterm = new Term(Fields.FM_SUMMARY, thisname);
+					Term owterm = new Term(Fields.OW2_SUMMARY, thisname);
+					TermQuery noselfquery = new TermQuery(noselfterm);
+					TermQuery sfquery = new TermQuery(sfterm);
+					TermQuery fmquery = new TermQuery(fmterm);
+					TermQuery owquery = new TermQuery(owterm);
+					BooleanQuery mainQuery = new BooleanQuery();
+					mainQuery.add(noselfquery, Occur.MUST_NOT);
+					mainQuery.add(sfquery, Occur.SHOULD);
+					mainQuery.add(fmquery, Occur.SHOULD);
+					mainQuery.add(owquery, Occur.SHOULD);
+
+					// fetch all the hits
+					TotalHitCountCollector counter = new TotalHitCountCollector();
+					try {
+						searcher.search(mainQuery, counter);
+						int total = counter.getTotalHits();
+						if (total <= 0)
+							continue;
+						TopScoreDocCollector collector = TopScoreDocCollector.create(
+								total, true);
+						searcher.search(mainQuery, collector);
+						TopDocs topDocs = collector.topDocs();
+						ScoreDoc[] scoreDocs = topDocs.scoreDocs;
+						for (ScoreDoc sdoc : scoreDocs) {
+							logger.info(thisname +" : "+ sdoc+" OK ");
+							//here something wrong with the index file, string decoding, out of java space error
+							Document d = searcher.doc(sdoc.doc);
+							Long mentiond_in = Long.valueOf(d.get(Fields.PROJECT_ID));
+							String forge = d.get(Fields.PROJECT_FORGE);
+							String context = "";
+							
+							if(forge.equals("sourceforge")){
+								context = d.get(Fields.SF_SUMMARY);
+							}else if(forge.equals("ow2")){
+								context = d.get(Fields.FM_SUMMARY);
+							}else if(forge.equals("freshmeat")){
+								context = d.get(Fields.OW2_SUMMARY);
+							}
+							Mentioned mention = new Mentioned();
+							mention.setRealname(thisname);
+							mention.setMentionedIn(mentiond_in);
+							mention.setContext(context);
+							//Here appears the problem
+							session.save(mention);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			
 	}
 
 	public DescriptionScanner() {
@@ -151,6 +164,6 @@ public class DescriptionScanner {
 
 	public static void main(String[] args) {
 		DescriptionScanner scanner = new DescriptionScanner();
-		scanner.scanThemAll();
+		scanner.scanThemAll(100);
 	}
 }
